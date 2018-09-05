@@ -1,0 +1,40 @@
+{
+  "name": "fareshare",
+  "version": "1.0.0",
+  "description": "Rideshare application ",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "beta",
+    "bcrypt": "^3.0.0",
+    "connect-mongo": "^2.0.1",
+    "cors": "^2.8.4",
+    "express-graphql": "^0.6.12",
+    "express-session": "^1.15.6",
+    "graphql": "^0.13.2",
+    "history": "^4.7.2",
+    "lodash": "^4.17.10",
+    "mongodb": "^3.0.2",
+    "mongoose": "^5.0.5",
+    "passport": "^0.4.0",
+    "pg": "^7.4.3"
+  },
+  "engines": {
+    "node": "9.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^3.0.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-prettier": "^2.6.2",
+    "eslint-plugin-react": "^7.11.1",
+    "prettier": "^1.14.2"
+  }
+}
