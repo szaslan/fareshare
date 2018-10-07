@@ -1,4 +1,5 @@
 const graphql = require('graphql');
+const db = require('../../db/db');
 
 const {
   buildSchema,
@@ -17,18 +18,40 @@ const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
     id: { type: GraphQLID },
-    firstName: { type: GraphQLString },
-    lastName: { type: GraphQLString },
+    name: { type: GraphQLString },
     email: { type: GraphQLString },
+    profile_pic: { type: GraphQLString },
   }),
 });
 
 const RequestType = new GraphQLObjectType({
   name: 'Request',
   fields: () => ({
-    id: { type: GraphQLID },
+    request_id: { type: GraphQLID },
+    location_start: { type: GraphQLString },
+    location_end: { type: GraphQLString },
+    // time_departure: {type: Graph}
     destination: { type: GraphQLString },
-    timeBuffer: { type: GraphQLInt },
+    time_buffer: { type: GraphQLInt },
+  }),
+});
+
+const MatchType = new GraphQLObjectType({
+  name: 'Match',
+  fields: () => ({
+    match_id: { type: GraphQLID },
+    user_id: { type: GraphQLID },
+    request_id: { type: GraphQLID },
+    // match_user returns a UserType with parent value of id which is = to the match_user_id return from the query
+    match_user: {
+      type: UserType,
+      async resolve(parent) {
+        console.log(parent);
+        const { match_user_id } = parent;
+        const res = await db.query(`SELECT * from users WHERE id = ${match_user_id}`);
+        return res.rows[0];
+      },
+    },
   }),
 });
 
@@ -38,15 +61,30 @@ const RootQuery = new GraphQLObjectType({
     user: {
       type: UserType,
       args: { id: { type: GraphQLID } },
-      resolve(parent, args) {
-        console.log(`userId: + ${args.id}`);
-        return User.findById(args.id);
+      async resolve(parent, args) {
+        console.log(`userId: ${args.id}`);
+        const res = await db.query(`SELECT * FROM users WHERE id = ${args.id}`);
+        return res.rows[0];
       },
     },
     requests: {
       type: new GraphQLList(RequestType),
-      resolve(parent, args) {
-        return Request.find();
+      // type: RequestType,
+      args: { id: { type: GraphQLID } },
+      async resolve(parent, args) {
+        const res = await db.query(`SELECT * FROM requests WHERE id = ${args.id}`);
+        return res.rows;
+      },
+    },
+    matches: {
+      type: new GraphQLList(MatchType),
+      args: { id: { type: GraphQLID } },
+      async resolve(parent, args) {
+        const { id } = args;
+        const res = await db.query(
+          `SELECT * FROM matches INNER JOIN users ON matches.user_id = users.id WHERE user_id = ${id}`
+        );
+        return res.rows;
       },
     },
   },

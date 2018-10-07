@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
-const pool = require('./db/db');
+const db = require('./db/db');
 
 // const schema = buildSchema(`
 //     type Query {
@@ -89,15 +89,6 @@ const router = express.Router();
 router.get('/', (req, res) => {
   console.log('API has launched.');
   res.json({ message: 'API Base Endpoint.' });
-});
-
-pool.connect((err, client, done) => {
-  if (err) console.log('error');
-  client.query(
-    'CREATE TABLE IF NOT EXISTS test_table(ID INT PRIMARY KEY NOT NULL, name CHAR(50) NOT NULL)',
-    () => console.log('queried')
-  );
-  done();
 });
 
 // const client = new Client({
@@ -253,58 +244,58 @@ router
 // User Routes
 // -=-=-=-=-=-=-=-=-=-
 
-router
-  .route('/match/:id')
+// router
+//   .route('/match/:id')
 
-  // get route
-  .get((req, res) => {
-    console.log('GET: requests');
+//   // get route
+//   .get((req, res) => {
+//     console.log('GET: requests');
 
-    const requestId = req.params.id;
-    Request.findById(requestId, (err, request) => {
-      if (err) {
-        res.send(err);
-        console.log(err);
-      }
+//     const requestId = req.params.id;
+//     Request.findById(requestId, (err, request) => {
+//       if (err) {
+//         res.send(err);
+//         console.log(err);
+//       }
 
-      const destination = request.destination;
-      const desiredTime = request.desiredTime;
-      const timeBuffer = request.timeBuffer;
+//       const destination = request.destination;
+//       const desiredTime = request.desiredTime;
+//       const timeBuffer = request.timeBuffer;
 
-      // Take attributes to find minimum and maximium time frames
-      // TODO figure out why needs to be -(-)... JS type system whack
-      const msBuffer = Number(timeBuffer) * 60 * 1000;
-      const lowerTimeBound = desiredTime - msBuffer;
-      const upperTimeBound = desiredTime - -msBuffer;
+//       // Take attributes to find minimum and maximium time frames
+//       // TODO figure out why needs to be -(-)... JS type system whack
+//       const msBuffer = Number(timeBuffer) * 60 * 1000;
+//       const lowerTimeBound = desiredTime - msBuffer;
+//       const upperTimeBound = desiredTime - -msBuffer;
 
-      // Find all requests with given time boundaries
-      Request.find({
-        _id: {
-          $ne: requestId,
-        },
-        desiredTime: {
-          $gte: lowerTimeBound,
-          $lte: upperTimeBound,
-        },
-        destination,
-      }).exec((err, compatibleRequests) => {
-        const userIdList = compatibleRequests.map(rideRequest =>
-          mongoose.Types.ObjectId(rideRequest.requester)
-        );
+//       // Find all requests with given time boundaries
+//       Request.find({
+//         _id: {
+//           $ne: requestId,
+//         },
+//         desiredTime: {
+//           $gte: lowerTimeBound,
+//           $lte: upperTimeBound,
+//         },
+//         destination,
+//       }).exec((err, compatibleRequests) => {
+//         const userIdList = compatibleRequests.map(rideRequest =>
+//           mongoose.Types.ObjectId(rideRequest.requester)
+//         );
 
-        User.find(
-          {
-            _id: { $in: userIdList },
-          },
+//         User.find(
+//           {
+//             _id: { $in: userIdList },
+//           },
 
-          (err, userMatches) => {
-            console.log(userMatches);
-            res.json(userMatches);
-          }
-        );
-      });
-    });
-  });
+//           (err, userMatches) => {
+//             console.log(userMatches);
+//             res.json(userMatches);
+//           }
+//         );
+//       });
+//     });
+//   });
 
 app.use('/api', router);
 app.listen(PORT);
